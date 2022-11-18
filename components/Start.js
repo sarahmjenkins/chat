@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Button, TextInput, ImageBackground, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, ImageBackground, TouchableOpacity, StyleSheet } from 'react-native';
 
 export default class Start extends React.Component {
   constructor(props) {
@@ -22,7 +22,10 @@ export default class Start extends React.Component {
               onChangeText={(name) => this.setState({ name })}
               value={this.state.name}
               placeholder="Your Name"
-              style={[styles.innerContainer, styles.textInput]}
+              style={styles.textInput}
+              accessible={true}
+              accessibilityLabel="Name input"
+              accessibilityHint="Enter your name here"
             />
 
             <View style={styles.colorContainer}>
@@ -31,18 +34,34 @@ export default class Start extends React.Component {
                 <TouchableOpacity 
                   style={[styles.colors, styles.black]} 
                   onPress={() => this.setState({ color: "#090C08" })}
+                  accessible={true}
+                  accessibilityLabel="black"
+                  accessibilityHint="Select for a black chat background"
+                  accessibilityRole="button"
                 />
                 <TouchableOpacity 
                   style={[styles.colors, styles.purple]} 
                   onPress={() => this.setState({ color: "#474056" })}
+                  accessible={true}
+                  accessibilityLabel="purple"
+                  accessibilityHint="Select for a purple chat background"
+                  accessibilityRole="button"
                 />
                 <TouchableOpacity 
                   style={[styles.colors, styles.blue]} 
                   onPress={() => this.setState({ color: "#8A95A5" })}
+                  accessible={true}
+                  accessibilityLabel="blue"
+                  accessibilityHint="Select for a blue chat background"
+                  accessibilityRole="button"
                 />
                 <TouchableOpacity 
                   style={[styles.colors, styles.green]} 
                   onPress={() => this.setState({ color: "#B9C6AE" })}
+                  accessible={true}
+                  accessibilityLabel="green"
+                  accessibilityHint="Select for a green chat background"
+                  accessibilityRole="button"
                 />
               </View>
             </View>
@@ -50,6 +69,10 @@ export default class Start extends React.Component {
             <TouchableOpacity
               onPress={() => this.props.navigation.navigate("Chat", { name: this.state.name, color: this.state.color })}
               style={styles.button}
+              accessible={true}
+              accessibilityLabel="Join chat"
+              accessibilityHint="Select to join chat"
+              accessibilityRole="button"
             >
               <Text style={styles.buttonText}>Start Chatting</Text>
             </TouchableOpacity> 
@@ -85,17 +108,19 @@ const styles = StyleSheet.create({
     bottom: '-10%',
     alignItems: 'left',
     justifyContent: 'center',
+    borderRadius: 10,
   },
   textInput: {
     opacity: 50,
     width: '88%',
+    height: 60,
     borderColor: '#757083',
     borderWidth: 1,
     borderRadius: 10,
-    height: 60,
     padding: '5%',
     marginLeft: 20,
-    marginTop: -20,
+    bottom: '-10%',
+    // When I take this out, it's easier to tap on the name box, but the styling gets messed up. Are there any alternatives?
   },
   colorContainer: {
     justifyContent: 'left',
