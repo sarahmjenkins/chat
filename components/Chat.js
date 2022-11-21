@@ -18,6 +18,7 @@ export default class Chat extends React.Component {
       loggedInText: 'Please wait while we log you in.'
     }
 
+    // set up firebase
     const firebaseConfig = {
       apiKey: "AIzaSyA1msZAIh8ucOmTzZgvdXwbTL9INP2kxEE",
       authDomain: "chat-d6853.firebaseapp.com",
@@ -35,15 +36,16 @@ export default class Chat extends React.Component {
     this.referenceChatMessages = firebase.firestore().collection('messages');
   }
 
+  // set initial state of app once logged in
   componentDidMount() {
     let { name } = this.props.route.params;
     this.props.navigation.setOptions({ title: name });
 
     this.referenceChatMessages = firebase.firestore().collection('messages');
 
-    this.authUnsubscribe = firebase.auth().onAuthStateChanged((user) => {
+    this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
       if (!user) {
-        firebase.auth().signInAnonymously();
+        await firebase.auth().signInAnonymously();
       }
 
       this.setState({
@@ -54,7 +56,7 @@ export default class Chat extends React.Component {
           name: name,
         },
         loggedInText: 'You are logged in',
-      })
+      });
 
       this.unsubscribe = this.referenceChatMessages.orderBy('createdAt', 'desc').onSnapshot(this.onCollectionUpdate);
     });
@@ -62,18 +64,19 @@ export default class Chat extends React.Component {
 
   componentWillUnmount() {
     this.authUnsubscribe;
-    this.unsubscribeMessagesUser;
-  }l
+  };
 
-  // Adds sent messages to state
+  // adds sent messages to state and database
   onSend(messages = []) {
-    this.setState((previousState) => ({
+    this.setState(
+      (previousState) => ({
       messages: GiftedChat.append(previousState.messages, messages),
-    }));
-
-    () => {this.addMessage(this.state.messages[0])};
+      }),
+      () => {this.addMessage()}
+    );
   }
 
+  // adds sent message to database
   addMessage() {
     const message = this.state.messages[0];
     this.referenceChatMessages.add({
@@ -85,19 +88,16 @@ export default class Chat extends React.Component {
     });
   }
 
+  // update anytime database changes
   onCollectionUpdate = (querySnapshot) => {
     const messages = [];
     querySnapshot.forEach((doc) => {
-      var data = doc.data();
+      let data = doc.data();
       messages.push({
         _id: data.id,
         text: data.text,
         createdAt: data.createdAt.toDate(),
-        user: {
-          _id: data.user._id,
-          name: data.user.name,
-          avatar: data.user.avatar,
-        }
+        user: data.user,
       });
     });
 
@@ -120,6 +120,7 @@ export default class Chat extends React.Component {
     )
   }
 
+  // UI
   render() {
     let { color } = this.props.route.params;
 
@@ -131,7 +132,8 @@ export default class Chat extends React.Component {
           messages={this.state.messages}
           onSend={messages => this.onSend(messages)}
           user={{
-            _id: 1,
+            _id: this.state.uid,
+            avatar: "https://placeimg.com/140/140/any",
           }}
         />
         { Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null }
