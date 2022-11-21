@@ -10,6 +10,11 @@ export default class Chat extends React.Component {
     this.state = {
       messages: [],
       uid: 0,
+      user: {
+        _id: '',
+        avatar: '',
+        name: '',
+      },
       loggedInText: 'Please wait while we log you in.'
     }
 
@@ -27,46 +32,31 @@ export default class Chat extends React.Component {
       firebase.initializeApp(firebaseConfig);
     }
 
-    this.referenceMessages = firebase.firestore().collection('messages');
+    this.referenceChatMessages = firebase.firestore().collection('messages');
   }
 
   componentDidMount() {
     let { name } = this.props.route.params;
     this.props.navigation.setOptions({ title: name });
 
-    this.referenceMessages = firebase.firestore().collection('messages');
+    this.referenceChatMessages = firebase.firestore().collection('messages');
 
-    this.authUnsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
+    this.authUnsubscribe = firebase.auth().onAuthStateChanged((user) => {
       if (!user) {
-        await firebase.auth().signInAnonymously();
+        firebase.auth().signInAnonymously();
       }
 
       this.setState({
-        messages: [
-          {
-            _id: 1,
-            text: `Hello ${name}`,
-            createdAt: new Date(),
-            user: {
-              _id: 2,
-              name: 'React Native',
-              avatar: 'https://placeimg.com/140/140/any',
-            },
-          },
-          {
-            _id: 2,
-            text: `Welcome to the Chat! app. ${name} has entered the chat.`,
-            createdAt: new Date(),
-            system: true,
-          },
-        ],
-        uid: this.state.uid,
+        uid: user.uid,
+        messages: [],
+        user: {
+          _id: user.uid,
+          name: name,
+        },
         loggedInText: 'You are logged in',
       })
 
-      this.referenceMessagesUser = firebase.firestore().collection('user').where('uid', '==', this.state.uid);
-
-      this.unsubscribeMessagesUser = this.referenceMessagesUser.onSnapshot(this.onCollectionUpdate);
+      this.unsubscribe = this.referenceChatMessages.orderBy('createdAt', 'desc').onSnapshot(this.onCollectionUpdate);
     });
   };
 
@@ -86,19 +76,16 @@ export default class Chat extends React.Component {
 
   addMessage() {
     const message = this.state.messages[0];
-    this.referenceMessages.add({
+    this.referenceChatMessages.add({
+      uid: this.state.uid,
       _id: message._id,
       text: message.text,
       createdAt: message.createdAt,
-      user: {
-        _id: message.user._id,
-        name: message.user.name,
-        avatar: message.user.avatar,
-      },
+      user: message.user,
     });
   }
 
-  onCollectionUpdate() {
+  onCollectionUpdate = (querySnapshot) => {
     const messages = [];
     querySnapshot.forEach((doc) => {
       var data = doc.data();
