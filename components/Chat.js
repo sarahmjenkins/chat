@@ -1,6 +1,8 @@
 import React from 'react';
 import { View,Text, Platform, KeyboardAvoidingView } from 'react-native';
 import { Bubble, GiftedChat } from 'react-native-gifted-chat';
+// TASK 3.4
+// import AsyncStorage from '@react-native-async-storage/async-storage';
 const firebase = require('firebase');
 require('firebase/firestore');
 
@@ -34,7 +36,20 @@ export default class Chat extends React.Component {
     }
 
     this.referenceChatMessages = firebase.firestore().collection('messages');
-  }
+  };
+
+  // TASK 3.4
+  // async getMessages() {
+  //   let messages = '';
+  //   try {
+  //     messages = await AsyncStorage.getItem('messages') || [];
+  //     this.setState({
+  //       messages: JSON.parse(messages)
+  //     });
+  //   } catch (error) {
+  //     console.log(error.message);
+  //   }
+  // };
 
   // set initial state of app once logged in
   componentDidMount() {
@@ -60,6 +75,8 @@ export default class Chat extends React.Component {
 
       this.unsubscribe = this.referenceChatMessages.orderBy('createdAt', 'desc').onSnapshot(this.onCollectionUpdate);
     });
+    // TASK 3.4
+    // this.getMessages();
   };
 
   componentWillUnmount() {
@@ -94,8 +111,8 @@ export default class Chat extends React.Component {
     querySnapshot.forEach((doc) => {
       let data = doc.data();
       messages.push({
-        _id: data.id,
-        text: data.text,
+        _id: data._id,
+        text: data.text || '',
         createdAt: data.createdAt.toDate(),
         user: data.user,
       });
@@ -131,10 +148,7 @@ export default class Chat extends React.Component {
           renderBubble={this.renderBubble.bind(this)}
           messages={this.state.messages}
           onSend={messages => this.onSend(messages)}
-          user={{
-            _id: this.state.uid,
-            avatar: "https://placeimg.com/140/140/any",
-          }}
+          user={this.state.user}
         />
         { Platform.OS === 'android' ? <KeyboardAvoidingView behavior="height" /> : null }
       </View>
