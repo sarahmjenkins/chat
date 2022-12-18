@@ -21,14 +21,14 @@ This project uses Google Firebase to store both chat messages and images. Gmail 
 1. Ensure Node.js and Expo are installed.
 
 2. Clone project from GitHub in command line: 
-- HTTPS: `$ git clone https://github.com/sarahmjenkins/chat.git`
-- SSH: `$ git clone git@github.com:sarahmjenkins/chat.git`
+    - HTTPS: `$ git clone https://github.com/sarahmjenkins/chat.git`
+    - SSH: `$ git clone git@github.com:sarahmjenkins/chat.git`
 
 3. Install dependencies:
-`$ npm install`
+    `$ npm install`
 
 4. Run using on your mobile device using the Expo app or Android studio:
-`$ expo start`
+    `$ expo start`
 
 ## Project dependencies
 
